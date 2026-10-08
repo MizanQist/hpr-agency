@@ -2,8 +2,10 @@ import { useEffect, useRef } from 'react'
 
 const VIDEO_URL = `${import.meta.env.BASE_URL}HeroVideo.mp4`
 const POSTER_URL = `${import.meta.env.BASE_URL}HeroPoster.jpg`
-// A seek that hasn't landed by then was dropped (background tab, suspended decoder) — stop waiting for it.
-const SEEK_TIMEOUT_MS = 250
+// A local seek lands in ~30 ms. One that hasn't landed by this point means the browser suspended or purged
+// the media pipeline while the tab was in the background — reload the element and seek again.
+const SEEK_TIMEOUT_MS = 500
+const MAX_RELOADS = 3
 
 export function ScrubVideo() {
   const ref = useRef<HTMLVideoElement>(null)
@@ -15,22 +17,32 @@ export function ScrubVideo() {
     if (!window.matchMedia('(pointer: fine)').matches) return
 
     let targetTime = 0
-    let seekStartedAt = 0 // 0 = no seek in flight
+    let hasTarget = false
+    let seekTimer: ReturnType<typeof setTimeout> | undefined // set while a seek is in flight
+    let reloads = 0
     let blobUrl = ''
     const controller = new AbortController()
 
+    const reload = () => {
+      seekTimer = undefined
+      if (!video.currentSrc || reloads >= MAX_RELOADS) return
+      reloads += 1
+      video.load() // restarts from the blob; loadedmetadata → seek to the target
+    }
     const seekTo = (t: number) => {
-      seekStartedAt = performance.now()
+      clearTimeout(seekTimer)
+      seekTimer = setTimeout(reload, SEEK_TIMEOUT_MS)
       video.currentTime = t
     }
-    const isSeekInFlight = () => seekStartedAt !== 0 && performance.now() - seekStartedAt < SEEK_TIMEOUT_MS
-    // One seek in flight at a time; when it lands (or is given up on), chase the target if it moved.
+    // One seek in flight at a time; when it lands, chase the target if it moved.
     const chase = () => {
-      if (!video.duration || isSeekInFlight()) return
+      if (!video.duration || seekTimer !== undefined) return
       if (Math.abs(video.currentTime - targetTime) > 0.001) seekTo(targetTime)
     }
     const onSeeked = () => {
-      seekStartedAt = 0
+      clearTimeout(seekTimer)
+      seekTimer = undefined
+      reloads = 0
       chase()
     }
     // Cursor x maps straight onto the timeline: left edge = first frame, right edge = last.
@@ -38,17 +50,13 @@ export function ScrubVideo() {
       if (!video.duration) return
       const fraction = Math.min(1, Math.max(0, e.clientX / window.innerWidth))
       targetTime = fraction * video.duration
+      hasTarget = true
       chase()
     }
-    // Face the camera (same frame as the poster) until the cursor moves.
+    // Face the camera (same frame as the poster) until the cursor moves; after a reload, go back to the cursor.
     const onMeta = () => {
-      targetTime = video.duration / 2
+      if (!hasTarget) targetTime = video.duration / 2
       seekTo(targetTime)
-    }
-    const onVisible = () => {
-      if (document.visibilityState !== 'visible') return
-      seekStartedAt = 0
-      chase()
     }
 
     // Pull the whole file first so every seek is local — streaming it makes early seeks wait on the network.
@@ -68,13 +76,12 @@ export function ScrubVideo() {
     window.addEventListener('mousemove', onMove)
     video.addEventListener('seeked', onSeeked)
     video.addEventListener('loadedmetadata', onMeta)
-    document.addEventListener('visibilitychange', onVisible)
     return () => {
       controller.abort()
+      clearTimeout(seekTimer)
       window.removeEventListener('mousemove', onMove)
       video.removeEventListener('seeked', onSeeked)
       video.removeEventListener('loadedmetadata', onMeta)
-      document.removeEventListener('visibilitychange', onVisible)
       if (blobUrl) URL.revokeObjectURL(blobUrl)
     }
   }, [])
