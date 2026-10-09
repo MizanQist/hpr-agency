@@ -25,7 +25,7 @@ const HALVES: Half[] = [
     line: 'One person picks up. The same person who finds it, checks it and hands it over.',
     note: '[Client: founder’s name and title]',
     cta: { label: 'Make a request', href: '#desk' },
-    photo: { name: 'founder-wall', alt: 'The founder of HPR, arms crossed, in front of a ribbed plaster wall.', position: '50% 18%' },
+    photo: { name: 'founder-sofa', alt: 'The founder of HPR on a sofa, turning a watch over in his hands.', position: '50% 28%' },
   },
   {
     side: 'right',
@@ -135,7 +135,7 @@ export function Split() {
                     src={img(`${half.photo.name}-780.jpg`)}
                     alt={half.photo.alt}
                     width={780}
-                    height={isLeft ? 1387 : 975}
+                    height={isLeft ? 1301 : 975}
                     loading="lazy"
                     decoding="async"
                     className={`h-full w-full object-cover transition-[filter] duration-700 ${isDim ? 'saturate-50 brightness-[0.55]' : 'brightness-[0.8]'}`}

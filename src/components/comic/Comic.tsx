@@ -23,8 +23,8 @@ const PANELS: Panel[] = [
     rotate: -1.5,
   },
   {
-    photo: 'founder-wall-4x5',
-    alt: 'The founder of HPR, arms crossed, in front of a ribbed plaster wall.',
+    photo: 'founder-sofa-4x5',
+    alt: 'The founder of HPR on a sofa, turning a watch over in his hands.',
     bubble: { line: 'Give me a week.', alt: 'Make it five days.', tail: 'right' },
     burst: 'ON IT.',
     rotate: 1.2,
