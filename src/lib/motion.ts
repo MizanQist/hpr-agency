@@ -14,10 +14,19 @@ export function hasFinePointer(): boolean {
   return window.matchMedia('(pointer: fine)').matches
 }
 
+let current: Lenis | null = null
+
+/** Scroll the page to y through Lenis when it is running, natively otherwise. */
+export function scrollPageTo(y: number, immediate = false): void {
+  if (current) current.scrollTo(y, { immediate })
+  else window.scrollTo({ top: y, behavior: immediate ? 'instant' : 'smooth' })
+}
+
 /** Lenis drives the scroll; GSAP's ticker drives Lenis, so ScrollTrigger and the smoothing never disagree. */
 export function initSmoothScroll(): Lenis | null {
   if (prefersReducedMotion()) return null
   const lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 1, touchMultiplier: 1.4 })
+  current = lenis
   lenis.on('scroll', ScrollTrigger.update)
   const tick = (time: number) => lenis.raf(time * 1000)
   gsap.ticker.add(tick)
@@ -25,6 +34,7 @@ export function initSmoothScroll(): Lenis | null {
   const original = lenis.destroy.bind(lenis)
   lenis.destroy = () => {
     gsap.ticker.remove(tick)
+    current = null
     original()
   }
   return lenis

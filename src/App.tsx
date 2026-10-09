@@ -8,6 +8,7 @@ import { Nav } from './components/shell/Nav'
 import { Pattern } from './components/shell/Pattern'
 import { Hero } from './components/hero/Hero'
 import { Statement } from './components/statement/Statement'
+import { Gallery } from './components/gallery/Gallery'
 
 export default function App() {
   const lenis = useRef<Lenis | null>(null)
@@ -34,6 +35,7 @@ export default function App() {
       <main className={ready ? '' : 'pointer-events-none'}>
         <Hero />
         <Statement />
+        <Gallery />
       </main>
     </>
   )
