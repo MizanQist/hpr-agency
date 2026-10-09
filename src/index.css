@@ -1,69 +1,12 @@
 @import "tailwindcss";
 
-/*
-  Design tokens for "The Memo on the Desk".
-  Every colour is a value that exists in the client's own photographs or logo; there is no seventh colour.
-  Type is one family, Quicksand, chosen because the logo's "hpr" is a rounded-terminal geometric monoline.
-  Fluid values run between a 390px phone and a 1440px desktop.
-*/
-@theme {
-  --font-sans: 'Quicksand', 'Helvetica Neue', Arial, sans-serif;
-
-  --color-studio: #bdbabb;  /* the hero's grey */
-  --color-plaster: #5a5243; /* the dark band of the ribbed wall */
-  --color-carbon: #3b3d41;  /* the shadows inside the watch movement */
-  --color-navy: #0e2b4b;    /* brand navy */
-  --color-paper: #f2f3f1;   /* the one sheet */
-  --color-gold: #d1ad65;    /* brand gold — only ever on dark grounds */
-
-  /* 14 / 16→17 / 20→23 / 24→30 / 28→40 / 44→72 */
-  --text-caption: 0.875rem;
-  --text-caption--line-height: 1.5;
-  --text-body: clamp(1rem, 0.977rem + 0.095vw, 1.0625rem);
-  --text-body--line-height: 1.55;
-  --text-h4: clamp(1.25rem, 1.18rem + 0.286vw, 1.4375rem);
-  --text-h4--line-height: 1.25;
-  --text-h3: clamp(1.5rem, 1.361rem + 0.571vw, 1.875rem);
-  --text-h3--line-height: 1.15;
-  --text-h2: clamp(1.75rem, 1.471rem + 1.143vw, 2.5rem);
-  --text-h2--line-height: 1.1;
-  --text-h1: clamp(2.75rem, 2.1rem + 2.667vw, 4.5rem);
-  --text-h1--line-height: 1;
-
-  /* the spine: the hero logo's left edge, 20px → 64px; section air 72px → 128px */
-  --spacing-spine: clamp(1.25rem, 0.229rem + 4.19vw, 4rem);
-  --spacing-section: clamp(4.5rem, 3.2rem + 5.333vw, 8rem);
-
-  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-html {
-  color-scheme: light only;
-  background: var(--color-navy);
+:root {
+  --font-heading: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-weight: 400;
-  background: var(--color-navy);
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Focus ring colour is set per ground: navy on light sections, gold on dark ones. */
-:focus-visible {
-  outline: 2px solid var(--ring, currentColor);
-  outline-offset: 3px;
-}
-
-/* Text awaiting the client. Visible on purpose; removed as real content arrives. */
-.placeholder {
-  outline: 1px dashed currentColor;
-  outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+  background: #000;
 }
