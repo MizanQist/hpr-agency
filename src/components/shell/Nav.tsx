@@ -13,7 +13,7 @@ const ITEMS: Array<{ label: string; id: string; live: boolean }> = [
   { label: 'Home', id: 'top', live: true },
   { label: 'The story', id: 'story', live: true },
   { label: 'What we find', id: 'find', live: true },
-  { label: 'The founder', id: 'founder', live: false },
+  { label: 'The founder', id: 'founder', live: true },
   { label: 'The desk', id: 'desk', live: false },
   { label: 'Contact', id: 'contact', live: false },
 ]
