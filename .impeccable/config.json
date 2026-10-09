@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "mona sans",
+        "createdAt": "2026-10-09T16:42:46.942Z",
+        "reason": "Claude: the user asked to build HPR around landonorris.com, whose body face is Mona Sans (verified in the live DOM, computed font-family); matching the reference is the brief, paired with Instrument Serif for the display role"
+      }
+    ]
+  }
+}

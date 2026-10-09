@@ -30,6 +30,13 @@ for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['pho
     await page.waitForTimeout(1200)
     await page.screenshot({ path: path.join(OUT, `${name}-${i}-exit-${Math.round(frac * 100)}.png`) })
   }
+  // section 3: the statement track runs from 200vh to 420vh
+  for (const [i, frac] of [[6, 2.15], [7, 2.6], [8, 3.1], [9, 3.7], [10, 4.1]]) {
+    await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), h * frac)
+    await page.waitForTimeout(1000)
+    if (i === 9) { await page.mouse.move(viewport.width * 0.5, viewport.height * 0.42); await page.waitForTimeout(600) }
+    await page.screenshot({ path: path.join(OUT, `${name}-${i}-statement-${Math.round(frac * 100)}.png`) })
+  }
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
   await page.waitForTimeout(800)
   await page.click('button[aria-label="Open menu"]')
