@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import type { ChangeEvent, CSSProperties, FocusEvent, FormEvent, ReactNode } from 'react'
 import { contact, desk, list, office } from '../../content/site'
 import { t } from '../ui/Placeholder'
@@ -10,7 +11,9 @@ type Field = keyof Memo
 type Control = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
 type Errors = Partial<Record<Field, string>>
 
-const REQUIRED = Object.keys(desk.errors) as Exclude<Field, 'neededBy'>[]
+/* A line is required exactly when it has an error message. */
+const ERRORS: Partial<Record<Field, string>> = desk.errors
+const REQUIRED = Object.keys(desk.errors) as Field[]
 const EMPTY: Memo = { request: '', details: '', neededBy: '', replyTo: '', from: '' }
 const MASK = `${import.meta.env.BASE_URL}img/hpr-wordmark-mask.png`
 /* If WhatsApp never takes the screen (blocked pop-up, desktop protocol handler) the copy shows after this beat. */
@@ -20,11 +23,10 @@ const SHEET = 'bg-paper p-7 text-navy [--ring:var(--color-navy)] lg:p-14'
 /* A bare underline, 1px at rest; focus and error add a second pixel beneath it without moving the line. */
 const CONTROL =
   'w-full rounded-none border-b border-navy bg-transparent py-2.5 text-body font-semibold text-navy focus-visible:shadow-[0_1px_0_0_var(--color-navy)] aria-invalid:shadow-[0_1px_0_0_var(--color-navy)]'
-const LINK = 'inline-flex min-h-11 items-center underline decoration-1 underline-offset-4 hover:decoration-2'
+const LINK = 'link'
 
 function errorFor(key: Field, value: string): string | undefined {
-  if (key === 'neededBy' || value.trim()) return undefined
-  return desk.errors[key]
+  return value.trim() ? undefined : ERRORS[key]
 }
 
 function validate(memo: Memo): Errors {
@@ -36,11 +38,11 @@ function validate(memo: Memo): Errors {
 function Letterhead() {
   const today = new Date()
   return (
-    <div className="flex items-start justify-between gap-6">
-      <div>
+    <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="shrink-0 whitespace-nowrap">
         <div
           aria-hidden="true"
-          className="aspect-[501/360] h-[72px] bg-navy"
+          className="aspect-[501/360] h-18 bg-navy"
           style={{
             maskImage: `url(${MASK})`,
             WebkitMaskImage: `url(${MASK})`,
@@ -52,7 +54,7 @@ function Letterhead() {
         />
         <p className="mt-2 text-caption">{desk.agency}</p>
       </div>
-      <time dateTime={today.toISOString().slice(0, 10)} className="text-caption">
+      <time dateTime={today.toISOString().slice(0, 10)} className="ml-auto text-caption whitespace-nowrap">
         {formatDate(today)}
       </time>
     </div>
@@ -61,6 +63,7 @@ function Letterhead() {
 
 type LineProps = { field: Field; label: string; hint?: string; error?: string; children: ReactNode }
 
+/* The direction draws a 10ch label column; 14ch is so the 'phone or email' hint stays on one line beside its label. */
 function MemoLine({ field, label, hint, error, children }: LineProps) {
   return (
     <div className="lg:grid lg:grid-cols-[14ch_1fr] lg:gap-x-6">
@@ -70,7 +73,8 @@ function MemoLine({ field, label, hint, error, children }: LineProps) {
       </label>
       <div>
         {children}
-        <p id={`desk-${field}-error`} aria-live="polite" className={error ? 'mt-2 text-caption' : 'sr-only'}>
+        {/* Not a live region: focus plus aria-describedby announces the error on submit; blur errors are read with the line. */}
+        <p id={`desk-${field}-error`} className={error ? 'mt-2 text-caption' : 'sr-only'}>
           {error}
         </p>
       </div>
@@ -84,6 +88,7 @@ export function RequestDesk() {
   const [view, setView] = useState<'memo' | 'copy'>('memo')
   const [settled, setSettled] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
+  const copyHeadingRef = useRef<HTMLHeadingElement>(null)
   const returning = useRef(false)
   const dirty = useRef(new Set<Field>())
 
@@ -119,9 +124,14 @@ export function RequestDesk() {
     }
   }, [view, settled])
 
-  /* "Edit the memo" removes the link that had focus; hand focus to the first line instead. */
+  /*
+    Each swap unmounts the control that had focus. Sending hands focus to the copy's heading, so the heading
+    and the "Opened in WhatsApp" line are read next; "Edit the memo" hands it to the first line of the sheet.
+  */
   useEffect(() => {
-    if (view === 'memo' && returning.current) {
+    if (view === 'copy') {
+      copyHeadingRef.current?.focus({ preventScroll: true })
+    } else if (returning.current) {
       returning.current = false
       formRef.current?.querySelector<HTMLElement>('select')?.focus()
     }
@@ -148,12 +158,18 @@ export function RequestDesk() {
     const found = validate(memo)
     const first = REQUIRED.find((key) => found[key])
     if (first) {
-      setErrors(found)
+      /* Commit the error before moving focus, so the control is announced invalid with its message. */
+      flushSync(() => setErrors(found))
       const control = e.currentTarget.elements.namedItem(first)
       if (control instanceof HTMLElement) control.focus()
       return
     }
-    window.open(whatsappUrl(contact.whatsapp, memoText(memo)), '_blank', 'noopener')
+    const url = whatsappUrl(contact.whatsapp, memoText(memo))
+    /* A blocked pop-up returns null; then go there in this tab rather than print "Opened in WhatsApp" untruthfully. */
+    if (!window.open(url, '_blank', 'noopener')) {
+      window.location.assign(url)
+      return
+    }
     setSettled(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
     setView('copy')
   }
@@ -180,13 +196,17 @@ export function RequestDesk() {
     .filter((k) => k !== 'neededBy' || memo.neededBy.trim())
     .map((k) => [k, desk.fields[k].label, memo[k]] as const)
 
+  /*
+    #desk is the statement, not the section, so arriving here puts the whole sheet and the button inside a 900px viewport.
+    No bottom padding: the office footer's own top padding is the 96px of air between the button and the lockup.
+  */
   return (
     <section
-      id="desk"
-      aria-labelledby="desk-heading"
-      className="scroll-mt-14 bg-navy px-spine py-section text-studio [--ring:var(--color-gold)]"
+      id="desk-section"
+      aria-labelledby="desk"
+      className="bg-navy px-spine pt-section pb-0 text-studio [--ring:var(--color-gold)]"
     >
-      <h2 id="desk-heading" className="text-h2 font-normal">
+      <h2 id="desk" className="scroll-mt-14 text-h2 font-normal">
         {desk.statement}
       </h2>
 
@@ -197,10 +217,10 @@ export function RequestDesk() {
               <Letterhead />
               <div className="mt-12 space-y-8">
                 <MemoLine field="request" label={desk.fields.request.label} error={errors.request}>
-                  <div className="relative after:pointer-events-none after:absolute after:top-1/2 after:right-0 after:-translate-y-1/2 after:content-['▾']">
+                  {/* content: '▾' / '' keeps the glyph out of the accessibility tree. */}
+                  <div className="relative after:pointer-events-none after:absolute after:top-1/2 after:right-0 after:-translate-y-1/2 after:[content:'▾'_/_'']">
                     <select
                       {...control('request')}
-                      required
                       className={`${CONTROL} appearance-none pr-6 ${memo.request ? '' : 'font-normal!'}`}
                     >
                       <option value="">{desk.fields.request.placeholderOption}</option>
@@ -217,7 +237,8 @@ export function RequestDesk() {
                     {...control('details')}
                     required
                     rows={2}
-                    className={`${CONTROL} resize-none`}
+                    /* field-sizing: content overrides rows; two line-heights plus the py-2.5 keep Details two rows tall */
+                    className={`${CONTROL} min-h-[calc(2lh+1.25rem)] resize-none`}
                     style={{ fieldSizing: 'content' } as CSSProperties}
                   />
                 </MemoLine>
@@ -241,7 +262,7 @@ export function RequestDesk() {
                   />
                 </MemoLine>
                 <MemoLine field="from" label={desk.fields.from.label} hint={desk.fields.from.hint} error={errors.from}>
-                  <input {...control('from')} type="text" required autoComplete="name" autoCapitalize="words" />
+                  <input {...control('from')} type="text" autoComplete="name" autoCapitalize="words" />
                 </MemoLine>
               </div>
             </div>
@@ -249,9 +270,10 @@ export function RequestDesk() {
             <div className="mt-6 flex flex-col gap-4 lg:flex-row-reverse lg:items-center lg:justify-start lg:gap-6">
               <button
                 type="submit"
-                className="min-h-11 bg-gold px-6 py-2 text-body font-medium text-navy active:opacity-85"
+                className="min-h-12 bg-gold px-6 py-2 text-body font-medium text-navy active:opacity-85"
               >
                 {desk.send}
+                <span className="sr-only">{desk.opensWhatsApp}</span>
               </button>
               <a
                 href={mailtoUrl(contact.email, desk.emailSubject, memoText(memo))}
@@ -263,12 +285,14 @@ export function RequestDesk() {
           </form>
         ) : (
           <div
-            className={`${SHEET} transition-[translate,opacity] duration-300 ease-out-quart lg:col-start-1 lg:col-end-9 ${
-              settled ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0'
+            className={`${SHEET} transition-[translate] duration-300 ease-out-quart lg:col-start-1 lg:col-end-9 ${
+              settled ? 'translate-y-0' : '-translate-y-3'
             }`}
           >
             <Letterhead />
-            <h3 className="mt-12 text-h4">{desk.copy.heading}</h3>
+            <h3 ref={copyHeadingRef} tabIndex={-1} className="mt-12 text-h4 font-normal">
+              {desk.copy.heading}
+            </h3>
             <p className="mt-2 text-caption">{desk.copy.opened(formatDate(new Date()))}</p>
             <div className="mt-8 space-y-2 text-body">
               {copyLines.map(([k, label, value]) => (
@@ -280,6 +304,7 @@ export function RequestDesk() {
             <div className="mt-8 flex flex-wrap gap-x-8 gap-y-2">
               <a href={waUrl} target="_blank" rel="noopener" className={`${LINK} text-body`}>
                 {desk.copy.openAgain}
+                <span className="sr-only">{desk.opensWhatsApp}</span>
               </a>
               <button type="button" onClick={handleEdit} className={`${LINK} text-body`}>
                 {desk.copy.edit}
@@ -289,13 +314,14 @@ export function RequestDesk() {
         )}
 
         <div className="mt-12 lg:col-start-10 lg:col-end-13 lg:mt-0">
-          <h3 className="text-h4">{desk.stepsHeading}</h3>
-          <ol className="mt-6 list-decimal space-y-2 pl-6 text-body">
+          {/* The whole aside sits on the 14px step at weight 500, a note beside the memo rather than a second heading. */}
+          <h3 className="text-caption font-medium">{desk.stepsHeading}</h3>
+          <ol className="mt-6 list-decimal space-y-2 pl-6 text-caption font-medium">
             {desk.steps.map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ol>
-          <p className="mt-12 text-caption">{desk.directHeading}</p>
+          <p className="mt-12 text-caption font-medium">{desk.directHeading}</p>
           <p className="mt-2">
             <a href={`https://wa.me/${contact.whatsapp}`} className={`${LINK} text-caption`}>
               {t(office.columns[1].lines[0])}

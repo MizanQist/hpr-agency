@@ -94,6 +94,7 @@ export function ScrubVideo() {
       muted
       playsInline
       preload="auto"
+      aria-hidden="true"
       className="fixed inset-0 z-0 h-full w-full object-cover object-[40%_center] md:object-center"
     />
   )

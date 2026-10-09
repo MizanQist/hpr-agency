@@ -34,12 +34,22 @@
   --spacing-spine: clamp(1.25rem, 0.229rem + 4.19vw, 4rem);
   --spacing-section: clamp(4.5rem, 3.2rem + 5.333vw, 8rem);
 
+  /* the reading measure for every paragraph: max-w-measure */
+  --container-measure: 62ch;
+
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* The one text link: a bare underline that thickens on hover, on a 44px touch target. */
+@utility link {
+  @apply inline-flex min-h-11 items-center underline decoration-1 underline-offset-4 hover:decoration-2;
 }
 
 html {
   color-scheme: light only;
   background: var(--color-navy);
+  /* The masthead is sticky and 56px tall (h-14); focus scrolls and hash jumps must clear it. */
+  scroll-padding-top: 3.5rem;
 }
 
 body {

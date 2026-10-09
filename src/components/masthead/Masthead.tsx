@@ -13,7 +13,7 @@ export function Masthead() {
       <nav>
         <a
           href="#desk"
-          className="inline-flex h-14 items-center text-body font-medium text-carbon underline decoration-1 underline-offset-4 hover:decoration-2"
+          className="inline-flex h-11 items-center text-body font-medium text-carbon underline decoration-1 underline-offset-4 hover:decoration-2"
         >
           {t(masthead.link)}
         </a>

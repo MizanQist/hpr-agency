@@ -68,13 +68,14 @@ export const desk = {
     replyTo: { label: 'Reply to', hint: 'phone or email' },
     from: { label: 'From', hint: 'your name' },
   },
+  // Required at the boundary: Details and Reply to only; the memo carries the ask without the rest.
   errors: {
-    request: 'Choose what you are asking for.',
     details: 'Write what you want, in a line or two.',
     replyTo: 'Write a phone number or an email we can reply to.',
-    from: 'Write your name so we know who is asking.',
   },
   send: 'Send the request',
+  // Read by screen readers only, after the button and the "open again" link.
+  opensWhatsApp: ' (opens WhatsApp)',
   orEmail: 'or send by email',
   stepsHeading: 'What happens next',
   steps: ['Write what you want.', 'We find it, check it and price it.', 'You approve. We handle the rest.'],
@@ -89,6 +90,7 @@ export const desk = {
 }
 
 export const office = {
+  heading: 'Hoomsuk PR Agency',
   columns: [
     { heading: 'Office', lines: ['[CLIENT: office address]', '[CLIENT: city]'] },
     {

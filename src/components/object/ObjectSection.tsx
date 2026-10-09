@@ -11,8 +11,8 @@ export function ObjectSection() {
       aria-labelledby="object-heading"
       className="bg-carbon px-spine py-section text-studio [--ring:var(--color-gold)] lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-6"
     >
-      {/* Mobile: the watch first, on the spine, about 70% wide. Desktop: columns 8–11, not bleeding. */}
-      <picture className="block w-[70%] max-w-[45rem] lg:col-start-8 lg:col-end-12 lg:row-start-1 lg:w-full">
+      {/* Mobile: the watch first, on the spine, about 70% wide, capped at tablet so it stays a modest object. Desktop: columns 8–11, not bleeding. */}
+      <picture className="block w-[70%] max-w-[22rem] lg:col-start-8 lg:col-end-12 lg:row-start-1 lg:w-full lg:max-w-none">
         <source type="image/webp" srcSet={`${img('watch-480.webp')} 480w, ${img('watch-720.webp')} 720w`} sizes="(min-width: 1024px) 30vw, 70vw" />
         <img
           src={img('watch-720.jpg')}
@@ -27,7 +27,7 @@ export function ObjectSection() {
         />
       </picture>
 
-      <div className="mt-8 max-w-[62ch] lg:col-start-1 lg:col-end-6 lg:row-start-1 lg:mt-0">
+      <div className="mt-8 max-w-measure lg:col-start-1 lg:col-end-6 lg:row-start-1 lg:mt-0">
         <h2 id="object-heading" className="text-h2 font-normal">
           {t(object.statement)}
         </h2>

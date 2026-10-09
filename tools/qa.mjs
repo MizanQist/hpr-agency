@@ -37,7 +37,7 @@ for (const [name, viewport] of VIEWPORTS) {
   })
   await page.waitForTimeout(400)
   await page.screenshot({ path: path.join(OUT, `${name}-full.png`), fullPage: true })
-  for (const id of ['list', 'founder', 'object', 'desk', 'office']) {
+  for (const id of ['list', 'founder', 'object', 'desk-section', 'office']) {
     const el = page.locator(`#${id}`)
     if (await el.count()) await el.screenshot({ path: path.join(OUT, `${name}-${id}.png`) }).catch(() => {})
   }
@@ -81,24 +81,24 @@ for (const [name, viewport] of VIEWPORTS) {
   check(!tabs.some((t) => t.endsWith('NO-RING')), `${name}: focus ring on every tabbed control (${tabs.length} stops)${tabs.some((t) => t.endsWith('NO-RING')) ? ' ' + tabs.filter((t) => t.endsWith('NO-RING')).join(',') : ''}`)
 
   // the request desk: empty submit shows errors and opens nothing; a filled memo opens wa.me and swaps to the copy
-  const desk = page.locator('#desk form')
+  const desk = page.locator('#desk-section form')
   if (await desk.count()) {
-    await page.evaluate(() => { window.__opened = []; window.open = (u) => { window.__opened.push(u); return null } })
-    await page.locator('#desk form button[type=submit], #desk button[type=submit]').first().click()
-    const afterEmpty = await page.evaluate(() => ({ opened: window.__opened.length, invalid: document.querySelectorAll('#desk [aria-invalid="true"], #desk :invalid').length }))
+    await page.evaluate(() => { window.__opened = []; window.open = (u) => { window.__opened.push(u); return {} } })
+    await page.locator('#desk-section form button[type=submit]').first().click()
+    const afterEmpty = await page.evaluate(() => ({ opened: window.__opened.length, invalid: document.querySelectorAll('#desk-section [aria-invalid="true"], #desk-section :invalid').length }))
     check(afterEmpty.opened === 0 && afterEmpty.invalid > 0, `${name}: empty submit blocked (${afterEmpty.invalid} invalid, ${afterEmpty.opened} opened)`)
-    const select = page.locator('#desk select').first()
+    const select = page.locator('#desk-section select').first()
     await select.selectOption({ index: 1 })
-    const textareas = page.locator('#desk textarea')
+    const textareas = page.locator('#desk-section textarea')
     if (await textareas.count()) await textareas.first().fill('Skeleton, blue strap, under 60 days.')
-    const texts = page.locator('#desk input[type=text], #desk input[type=tel], #desk input[type=email], #desk input:not([type])')
+    const texts = page.locator('#desk-section input[type=text], #desk-section input[type=tel], #desk-section input[type=email], #desk-section input:not([type])')
     const n = await texts.count()
     for (let i = 0; i < n; i++) await texts.nth(i).fill(i === n - 1 ? 'A. Client' : '08030000000')
-    await page.locator('#desk form button[type=submit], #desk button[type=submit]').first().click()
-    const after = await page.evaluate(() => ({ opened: window.__opened, copy: /Your copy/.test(document.querySelector('#desk')?.textContent || '') }))
+    await page.locator('#desk-section form button[type=submit]').first().click()
+    const after = await page.evaluate(() => ({ opened: window.__opened, copy: /Your copy/.test(document.querySelector('#desk-section')?.textContent || '') }))
     check(after.opened.length === 1 && /^https:\/\/wa\.me\/\d+\?text=Request/.test(after.opened[0] || ''), `${name}: send opens wa.me with the memo (${(after.opened[0] || '').slice(0, 70)})`)
     check(after.copy, `${name}: sheet swapped to the visitor's copy`)
-    await page.locator('#desk').screenshot({ path: path.join(OUT, `${name}-desk-copy.png`) }).catch(() => {})
+    await page.locator('#desk-section').screenshot({ path: path.join(OUT, `${name}-desk-copy.png`) }).catch(() => {})
   } else {
     check(false, `${name}: request desk form present`)
   }
