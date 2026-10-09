@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { ScrubVideo } from '../../ScrubVideo'
 import { Pattern } from '../shell/Pattern'
 import { gsap, ScrollTrigger, prefersReducedMotion } from '../../lib/motion'
+import { setNavTheme } from '../../lib/theme'
 
 const MASK = `${import.meta.env.BASE_URL}img/hpr-wordmark-mask.png`
 const img = (f: string) => `${import.meta.env.BASE_URL}img/${f}`
@@ -56,7 +57,16 @@ export function Hero() {
     if (!root) return
     const quick = prefersReducedMotion()
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ scrollTrigger: { trigger: root, start: 'top top', end: 'bottom bottom', scrub: quick ? false : 0.6 } })
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: root,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: quick ? false : 0.6,
+          /* the header reads navy on the grey video, paper once the navy panel has risen behind it */
+          onUpdate: (self) => setNavTheme(self.progress > 0.35 ? 'dark' : 'hero'),
+        },
+      })
       tl.fromTo('[data-hero-panel]', { clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0% 0 0 0)', ease: 'none', duration: 0.6 }, 0)
         .to('[data-hero-video]', { scale: 0.92, filter: 'brightness(0.55)', ease: 'none', duration: 0.6 }, 0)
         .to('[data-hero-card]', { y: 40, opacity: 0, ease: 'none', duration: 0.25 }, 0)

@@ -1,23 +1,24 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { RefObject } from 'react'
 import { gsap, ScrollTrigger, hasFinePointer, prefersReducedMotion, scrollPageTo } from '../../lib/motion'
+import { setNavTheme } from '../../lib/theme'
 import { Pattern } from '../shell/Pattern'
 
 const img = (f: string) => `${import.meta.env.BASE_URL}img/${f}`
 
-type Panel = {
-  id: string
-  word: string
-  line: string
-  photo?: { webp: string; jpg: string; width: number; height: number; alt: string }
-  placeholder?: string
-}
+type Photo = { name: string; alt: string }
+type Panel = { id: string; word: string; line: string; photos?: Photo[]; placeholder?: string }
 
 const PANELS: Panel[] = [
   {
     id: 'watch',
     word: 'Watches',
     line: 'Rare references, discontinued pieces, the one you were told is unavailable.',
-    photo: { webp: 'watch-720.webp', jpg: 'watch-720.jpg', width: 720, height: 900, alt: 'A skeletonised tonneau watch with a grey case and blue strap, worn on the wrist.' },
+    photos: [
+      { name: 'rm-lift', alt: 'Gloved hands lifting a green Richard Mille RM 029 Le Mans out of an hpr presentation case.' },
+      { name: 'rm-held', alt: 'The Richard Mille RM 029 Le Mans held up close: green case, white strap, skeleton dial.' },
+      { name: 'ap-royal-oak', alt: 'An Audemars Piguet Royal Oak in a brown presentation box.' },
+    ],
   },
   { id: 'jet', word: 'Private jets', line: 'Charter, a share, or the aircraft itself. Crewed, positioned, ready.', placeholder: 'private jet' },
   { id: 'animal', word: 'Animals', line: 'From thoroughbreds to the rarest breeds, sourced and moved with the right papers.', placeholder: 'animal' },
@@ -28,9 +29,8 @@ const STEP = 1 / (N - 1)
 
 const WORD = 'block whitespace-nowrap font-sans text-[clamp(3rem,8.6vw,8.5rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.035em] [font-stretch:88%]'
 
-/* The photo, or an honest frame for the one the client still owes us. Tilts toward a fine pointer. */
-function Frame({ panel, index }: { panel: Panel; index: number }) {
-  const ref = useRef<HTMLDivElement>(null)
+/* Lean toward a fine pointer, spring back when it leaves. */
+function useTilt(ref: RefObject<HTMLElement | null>, amount = 14) {
   useEffect(() => {
     const el = ref.current
     if (!el || !hasFinePointer()) return
@@ -38,7 +38,7 @@ function Frame({ panel, index }: { panel: Panel; index: number }) {
       const r = el.getBoundingClientRect()
       const px = (e.clientX - r.left) / r.width - 0.5
       const py = (e.clientY - r.top) / r.height - 0.5
-      gsap.to(el, { rotateY: px * 14, rotateX: -py * 14, duration: 0.6, ease: 'power3.out', transformPerspective: 900 })
+      gsap.to(el, { rotateY: px * amount, rotateX: -py * amount, duration: 0.6, ease: 'power3.out', transformPerspective: 900 })
     }
     const onLeave = () => gsap.to(el, { rotateY: 0, rotateX: 0, duration: 0.9, ease: 'elastic.out(1, 0.5)' })
     el.addEventListener('mousemove', onMove)
@@ -47,25 +47,60 @@ function Frame({ panel, index }: { panel: Panel; index: number }) {
       el.removeEventListener('mousemove', onMove)
       el.removeEventListener('mouseleave', onLeave)
     }
-  }, [])
+  }, [ref, amount])
+}
 
+/* Resting and spread positions for the front, middle and back card of a deck. */
+const CARD = [
+  'z-30 [transform:rotate(0deg)_translate(0,0)] group-hover:[transform:rotate(0deg)_translate(0,-4%)]',
+  'z-20 [transform:rotate(-6deg)_translate(-7%,3%)] group-hover:[transform:rotate(-11deg)_translate(-22%,5%)]',
+  'z-10 [transform:rotate(6deg)_translate(7%,3%)] group-hover:[transform:rotate(11deg)_translate(22%,5%)]',
+]
+
+/* Three photographs in a fanned stack: hover spreads them, a click brings the next one to the front. */
+function Deck({ photos }: { photos: Photo[] }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [order, setOrder] = useState(() => photos.map((_, i) => i))
+  useTilt(ref, 10)
+  return (
+    <div
+      ref={ref}
+      data-cursor="Flip"
+      role="button"
+      tabIndex={0}
+      aria-label="Next photograph"
+      onClick={() => setOrder((o) => [...o.slice(1), o[0]])}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setOrder((o) => [...o.slice(1), o[0]]))}
+      className="group relative aspect-[4/5] w-full cursor-pointer [transform-style:preserve-3d]"
+    >
+      {order.map((photoIndex, pos) => {
+        const photo = photos[photoIndex]
+        return (
+          <figure
+            key={photo.name}
+            className={`absolute inset-0 overflow-hidden rounded-sm border border-current/15 bg-navy shadow-[0_30px_60px_-20px_rgba(0,0,0,0.55)] transition-transform duration-700 ease-[var(--ease-brand)] ${CARD[pos]}`}
+          >
+            <picture>
+              <source type="image/webp" srcSet={`${img(`${photo.name}-780.webp`)} 780w, ${img(`${photo.name}-1170.webp`)} 1170w`} sizes="(min-width: 1024px) 32vw, 60vw" />
+              <img src={img(`${photo.name}-780.jpg`)} alt={photo.alt} width={780} height={975} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+            </picture>
+          </figure>
+        )
+      })}
+    </div>
+  )
+}
+
+/* An honest frame for a photograph the client still owes us. */
+function Placeholder({ label }: { label: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  useTilt(ref)
   return (
     <div ref={ref} className="relative aspect-[4/5] w-full overflow-hidden rounded-sm border border-current/20 bg-current/5 will-change-transform [transform-style:preserve-3d]">
-      <div data-gallery-img={index} className="absolute -inset-x-[14%] inset-y-0">
-        {panel.photo ? (
-          <picture>
-            <source type="image/webp" srcSet={img(panel.photo.webp)} />
-            <img src={img(panel.photo.jpg)} alt={panel.photo.alt} width={panel.photo.width} height={panel.photo.height} loading="lazy" decoding="async" className="h-full w-full object-cover" />
-          </picture>
-        ) : (
-          <div className="relative h-full w-full">
-            <Pattern line="currentColor" dot="currentColor" lineOpacity={0.25} dotOpacity={0.4} size={96} drift={false} />
-            <p className="absolute inset-0 flex items-center justify-center p-6 text-center text-[11px] font-medium tracking-[0.18em] uppercase opacity-70">
-              [Client photo: {panel.placeholder}]
-            </p>
-          </div>
-        )}
-      </div>
+      <Pattern line="currentColor" dot="currentColor" lineOpacity={0.25} dotOpacity={0.4} size={96} drift={false} />
+      <p className="absolute inset-0 flex items-center justify-center p-6 text-center text-[11px] font-medium tracking-[0.18em] uppercase opacity-70">
+        [Client photo: {label}]
+      </p>
     </div>
   )
 }
@@ -90,9 +125,12 @@ export function Gallery() {
           start: 'top top',
           end: 'bottom bottom',
           scrub: 0.5,
+          onEnter: () => setNavTheme('dark'),
+          onLeaveBack: () => setNavTheme('light'),
           onUpdate: (self) => {
             const i = Math.min(N - 1, Math.max(0, Math.round(self.progress * (N - 1))))
             if (counter.current) counter.current.textContent = String(i + 1).padStart(2, '0')
+            setNavTheme(self.progress > 0.45 ? 'light' : 'dark')
           },
         },
       })
@@ -131,11 +169,13 @@ export function Gallery() {
     const stage = root.querySelector<HTMLElement>('[data-stage]')
     if (!stage) return
     let dragging = false
+    let moved = false
     let startX = 0
     let startY = 0
     const down = (e: PointerEvent) => {
-      if ((e.target as Element).closest('a, button')) return
+      if ((e.target as Element).closest('a, button, [role=button]')) return
       dragging = true
+      moved = false
       startX = e.clientX
       startY = window.scrollY
       stage.classList.add('select-none')
@@ -143,12 +183,13 @@ export function Gallery() {
     }
     const move = (e: PointerEvent) => {
       if (!dragging) return
-      const ratio = window.innerHeight / window.innerWidth
-      scrollPageTo(startY - (e.clientX - startX) * ratio, true)
+      moved = true
+      scrollPageTo(startY - (e.clientX - startX) * (window.innerHeight / window.innerWidth), true)
     }
     const up = () => {
       dragging = false
       stage.classList.remove('select-none')
+      void moved
     }
     stage.addEventListener('pointerdown', down)
     stage.addEventListener('pointermove', move)
@@ -184,7 +225,7 @@ export function Gallery() {
         </div>
       </div>
       <div className="order-1 w-[58%] max-w-[22rem] self-end lg:order-2 lg:col-span-4 lg:col-start-9 lg:w-full lg:max-w-none lg:self-center [perspective:900px]">
-        <Frame panel={panel} index={i} />
+        <div data-gallery-img={i}>{panel.photos ? <Deck photos={panel.photos} /> : <Placeholder label={panel.placeholder ?? panel.word} />}</div>
       </div>
     </article>
   ))
