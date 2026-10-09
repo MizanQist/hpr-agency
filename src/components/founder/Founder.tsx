@@ -53,16 +53,16 @@ export function Founder() {
         />
       </picture>
 
-      <div className="bg-plaster px-spine py-section text-paper [--ring:var(--color-paper)] lg:col-start-7 lg:col-end-13 lg:row-start-2 lg:-mr-spine lg:self-start lg:p-14">
+      <div className="bg-plaster px-spine py-12 text-paper [--ring:var(--color-paper)] lg:col-start-7 lg:col-end-13 lg:row-start-2 lg:-mr-spine lg:self-start lg:p-14">
         <h2 id="founder-heading" className="text-h2 font-normal">
           {t(founder.name)}
         </h2>
         <p className="mt-2 text-body">{t(founder.title)}</p>
-        <p className="mt-8 max-w-measure text-body">{t(founder.bio)}</p>
+        <p className="mt-8 max-w-[62ch] text-body">{t(founder.bio)}</p>
         <p className="mt-6 text-body">{t(founder.discretion)}</p>
 
         <h3 className="mt-12 text-h4 font-normal">{founder.conditionsHeading}</h3>
-        <dl className="mt-4 grid grid-cols-1 gap-y-4 text-body lg:grid-cols-[auto_1fr] lg:gap-x-6 lg:gap-y-2">
+        <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-body">
           {founder.conditions.map((c) => (
             <div key={c.term} className="contents">
               <dt className="font-medium">{c.term}</dt>

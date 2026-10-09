@@ -12,11 +12,6 @@ test('memo keeps the optional line when given', () => {
   assert.match(text, /\nNeeded by: June\n/)
 })
 
-test('memo drops any empty line, not just the optional one', () => {
-  const text = memoText({ request: '', details: 'A table for eight on Friday', neededBy: '', replyTo: 'me@x.y', from: '  ' })
-  assert.equal(text, 'Details: A table for eight on Friday\nReply to: me@x.y')
-})
-
 test('links encode newlines and ampersands', () => {
   assert.equal(whatsappUrl('2340000000000', 'a&b\nc'), 'https://wa.me/2340000000000?text=a%26b%0Ac')
   assert.equal(mailtoUrl('x@y.z', 'Request', 'a b'), 'mailto:x@y.z?subject=Request&body=a%20b')

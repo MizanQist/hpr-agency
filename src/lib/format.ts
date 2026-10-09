@@ -10,19 +10,16 @@ export interface Memo {
   from: string
 }
 
-/** The memo as it is sent: one line per field, empty lines left out. */
+/** The memo as it is sent: one line per field, empty optional lines left out. */
 export function memoText(memo: Memo): string {
-  const lines: Array<[string, string]> = [
-    ['Request', memo.request],
-    ['Details', memo.details],
-    ['Needed by', memo.neededBy],
-    ['Reply to', memo.replyTo],
-    ['From', memo.from],
+  const lines = [
+    `Request: ${memo.request}`,
+    `Details: ${memo.details}`,
+    memo.neededBy.trim() ? `Needed by: ${memo.neededBy}` : '',
+    `Reply to: ${memo.replyTo}`,
+    `From: ${memo.from}`,
   ]
-  return lines
-    .filter(([, value]) => value.trim())
-    .map(([label, value]) => `${label}: ${value.trim()}`)
-    .join('\n')
+  return lines.filter(Boolean).join('\n')
 }
 
 export function whatsappUrl(number: string, text: string): string {

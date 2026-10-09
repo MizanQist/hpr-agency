@@ -18,21 +18,21 @@ export function CategoryList() {
         {t(list.headline)}
       </h2>
 
-      <p className="mt-12 max-w-measure text-body text-pretty lg:col-start-1 lg:col-end-7">{t(list.paragraph)}</p>
+      <p className="mt-12 max-w-[62ch] text-body text-pretty lg:col-start-1 lg:col-end-7">{t(list.paragraph)}</p>
 
-      <ul role="list" className="mt-12 flex flex-col gap-6 lg:col-span-12 lg:grid lg:grid-cols-subgrid">
+      <ul className="mt-12 flex flex-col gap-6 lg:col-span-12 lg:grid lg:grid-cols-subgrid">
         {list.categories.map((category) => (
           <li
             key={category.id}
             className="flex flex-col gap-1 lg:col-span-12 lg:grid lg:grid-cols-subgrid lg:items-baseline"
           >
-            <a
-              href="#desk"
+            <button
+              type="button"
               onClick={() => requestDesk(category.id)}
-              className="min-h-11 py-1 text-left text-h3 font-normal text-carbon decoration-1 underline-offset-4 hover:underline [@media(hover:none)]:underline lg:col-start-1 lg:col-end-5"
+              className="min-h-11 py-1 text-left text-h3 font-normal text-carbon decoration-1 underline-offset-4 hover:underline lg:col-start-1 lg:col-end-5"
             >
               {t(category.name)}
-            </a>
+            </button>
             <p className="text-body text-pretty lg:col-start-5 lg:col-end-11">{t(category.line)}</p>
           </li>
         ))}

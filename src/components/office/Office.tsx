@@ -24,24 +24,21 @@ export function Office() {
         height={376}
         loading="lazy"
         decoding="async"
-        className="h-20 w-auto sm:h-28 lg:col-start-1 lg:col-end-4"
+        className="h-16 w-auto sm:h-28 lg:col-start-1 lg:col-end-4"
       />
 
-      <h2 className="sr-only">{office.heading}</h2>
-
-      <div className="mt-12 grid gap-8 lg:col-start-5 lg:col-end-13 lg:mt-0 lg:grid-cols-3">
+      <div className="mt-12 grid gap-8 md:grid-cols-3 lg:col-start-5 lg:col-end-13 lg:mt-0">
         {office.columns.map((column, c) => {
           const lines = (
             <ul role="list" className="mt-2 text-caption">
               {column.lines.map((line, i) => {
                 const href = lineHref(c, i)
                 return (
-                  /* Every line is a 44px row so the two link targets never overlap the plain-text lines between them. */
-                  <li key={line} className="flex min-h-11 items-center">
+                  <li key={line}>
                     {href ? (
                       <a
                         href={href}
-                        className="link"
+                        className="-my-3 inline-block py-3 underline decoration-1 underline-offset-4 hover:decoration-2"
                       >
                         {t(line)}
                       </a>
@@ -55,7 +52,7 @@ export function Office() {
           )
           return (
             <div key={column.heading}>
-              <h3 className="text-caption font-medium">{column.heading}</h3>
+              <h3 className="text-body font-medium">{column.heading}</h3>
               {c === REGISTERED ? lines : <address className="not-italic">{lines}</address>}
             </div>
           )
