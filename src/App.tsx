@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { initSmoothScroll } from './lib/motion'
 import type { Lenis } from './lib/motion'
 import { Loader } from './components/shell/Loader'
@@ -13,19 +13,17 @@ import { Split } from './components/split/Split'
 
 export default function App() {
   const lenis = useRef<Lenis | null>(null)
-  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     lenis.current = initSmoothScroll()
     return () => lenis.current?.destroy()
   }, [])
 
-  const onLoaded = useCallback(() => setReady(true), [])
   const onMenuToggle = useCallback((open: boolean) => (open ? lenis.current?.stop() : lenis.current?.start()), [])
 
   return (
     <>
-      <Loader onDone={onLoaded} />
+      <Loader />
       <Cursor />
       <Progress />
       <Nav onMenuToggle={onMenuToggle} />
@@ -33,7 +31,7 @@ export default function App() {
       <div aria-hidden="true" className="fixed inset-0 -z-10 bg-navy">
         <Pattern line="#d1ad65" dot="#d1ad65" lineOpacity={0.16} dotOpacity={0.32} />
       </div>
-      <main className={ready ? '' : 'pointer-events-none'}>
+      <main>
         <Hero />
         <Comic />
         <Gallery />

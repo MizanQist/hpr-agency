@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import { ScrubVideo } from '../../ScrubVideo'
 import { Pattern } from '../shell/Pattern'
 import { gsap, ScrollTrigger, prefersReducedMotion } from '../../lib/motion'
-import { setNavTheme } from '../../lib/theme'
 
 const MASK = `${import.meta.env.BASE_URL}img/hpr-wordmark-mask.png`
 const img = (f: string) => `${import.meta.env.BASE_URL}img/${f}`
@@ -64,7 +63,7 @@ export function Hero() {
           end: 'bottom bottom',
           scrub: quick ? false : 0.6,
           /* the header reads navy on the grey video, paper once the navy panel has risen behind it */
-          onUpdate: (self) => setNavTheme(self.progress > 0.35 ? 'dark' : 'hero'),
+          onUpdate: (self) => root.firstElementChild?.setAttribute('data-ground', self.progress > 0.35 ? 'dark' : 'hero'),
         },
       })
       tl.fromTo('[data-hero-panel]', { clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0% 0 0 0)', ease: 'none', duration: 0.6 }, 0)
@@ -81,7 +80,7 @@ export function Hero() {
 
   return (
     <section ref={track} id="top" aria-label="HPR" className="relative h-[200vh]">
-      <div className="sticky top-0 h-screen overflow-hidden bg-studio">
+      <div data-ground="hero" className="sticky top-0 h-screen overflow-hidden bg-studio">
         <div data-hero-video data-cursor="Move" className="absolute inset-0 origin-center will-change-transform">
           <ScrubVideo />
         </div>

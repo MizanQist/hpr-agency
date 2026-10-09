@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger, hasFinePointer, prefersReducedMotion } from '../../lib/motion'
-import { setNavTheme } from '../../lib/theme'
 import { Magnetic } from '../shell/Magnetic'
 
 const img = (f: string) => `${import.meta.env.BASE_URL}img/${f}`
@@ -66,9 +65,6 @@ export function Split() {
           start: 'top top',
           end: 'bottom bottom',
           scrub: 0.5,
-          onEnter: () => setNavTheme('dark'),
-          onEnterBack: () => setNavTheme('dark'),
-          onLeaveBack: () => setNavTheme('light'),
         },
       })
       tl.fromTo('[data-half="left"]', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', ease: 'none', duration: 0.5 }, 0)
@@ -119,7 +115,7 @@ export function Split() {
       <h2 id="split-heading" className="sr-only">
         The founder and the desk
       </h2>
-      <div ref={stage} data-stage className="sticky top-0 flex h-screen flex-col overflow-hidden bg-navy text-paper md:flex-row" style={{ ['--split' as string]: REST }}>
+      <div ref={stage} data-stage data-ground="dark" className="sticky top-0 flex h-screen flex-col overflow-hidden bg-navy text-paper md:flex-row" style={{ ['--split' as string]: REST }}>
         {HALVES.map((half) => {
           const isLeft = half.side === 'left'
           const isActive = active === half.side

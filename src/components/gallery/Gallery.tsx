@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { RefObject } from 'react'
 import { gsap, ScrollTrigger, hasFinePointer, prefersReducedMotion, scrollPageTo } from '../../lib/motion'
-import { setNavTheme } from '../../lib/theme'
 import { Pattern } from '../shell/Pattern'
 
 const img = (f: string) => `${import.meta.env.BASE_URL}img/${f}`
@@ -125,12 +124,10 @@ export function Gallery() {
           start: 'top top',
           end: 'bottom bottom',
           scrub: 0.5,
-          onEnter: () => setNavTheme('dark'),
-          onLeaveBack: () => setNavTheme('light'),
           onUpdate: (self) => {
             const i = Math.min(N - 1, Math.max(0, Math.round(self.progress * (N - 1))))
             if (counter.current) counter.current.textContent = String(i + 1).padStart(2, '0')
-            setNavTheme(self.progress > 0.45 ? 'light' : 'dark')
+            root.querySelector('[data-stage]')?.setAttribute('data-ground', self.progress > 0.45 ? 'light' : 'dark')
           },
         },
       })
@@ -232,7 +229,7 @@ export function Gallery() {
 
   if (still) {
     return (
-      <section id="find" aria-labelledby="find-heading" className="bg-paper text-navy">
+      <section id="find" data-ground="light" aria-labelledby="find-heading" className="bg-paper text-navy">
         <h2 id="find-heading" className="sr-only">What we find</h2>
         {panels.map((p, i) => (
           <div key={PANELS[i].id} className="h-screen">
@@ -245,7 +242,7 @@ export function Gallery() {
 
   return (
     <section ref={track} id="find" aria-labelledby="find-heading" className="relative" style={{ height: `${N * 100}vh` }}>
-      <div data-stage data-cursor="Drag" className="sticky top-0 h-screen overflow-hidden bg-navy text-paper touch-pan-y">
+      <div data-stage data-ground="dark" data-cursor="Drag" className="sticky top-0 h-screen overflow-hidden bg-navy text-paper touch-pan-y">
         <div data-pattern-gold className="absolute inset-0">
           <Pattern line="#d1ad65" dot="#d1ad65" lineOpacity={0.16} dotOpacity={0.32} />
         </div>

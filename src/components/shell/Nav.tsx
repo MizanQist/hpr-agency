@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger, prefersReducedMotion } from '../../lib/motion'
-import { onNavTheme } from '../../lib/theme'
+import { groundUnderHeader } from '../../lib/theme'
 import type { NavTheme } from '../../lib/theme'
 import { Pattern } from './Pattern'
 import { Magnetic } from './Magnetic'
@@ -28,8 +28,27 @@ export function Nav({ onMenuToggle }: Props) {
   const bar = useRef<HTMLElement>(null)
   const glow = useRef<HTMLSpanElement>(null)
   const list = useRef<HTMLUListElement>(null)
+  const pill = useRef<HTMLElement>(null)
 
-  useEffect(() => onNavTheme(setTheme), [])
+  /* Sample the ground under the header on every scroll frame (cheap: two elementsFromPoint calls). */
+  useEffect(() => {
+    let frame = 0
+    const sample = () => {
+      frame = 0
+      setTheme(groundUnderHeader())
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(sample)
+    }
+    sample()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    ScrollTrigger.addEventListener('refresh', sample)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', onScroll)
+      ScrollTrigger.removeEventListener('refresh', sample)
+    }
+  }, [])
 
   /* Scrollspy: whichever live section owns the top third of the viewport is the active one. */
   useEffect(() => {
@@ -44,19 +63,58 @@ export function Nav({ onMenuToggle }: Props) {
     return () => triggers.forEach((t) => t.kill())
   }, [])
 
-  /* The liquid highlight slides to the hovered item and rests on the active one. */
+  /* The highlight travels like a droplet: it stretches while it moves and settles with a wobble. */
   const moveGlow = (target: HTMLElement | null, instant = false) => {
     const g = glow.current
     const l = list.current
     if (!g || !l || !target) return
     const lr = l.getBoundingClientRect()
     const tr = target.getBoundingClientRect()
-    gsap.to(g, { x: tr.left - lr.left, width: tr.width, opacity: 1, duration: instant || prefersReducedMotion() ? 0 : 0.5, ease: 'power3.out' })
+    /* rects are measured after the pill's hover scale; the glow is positioned in the pill's own units */
+    const scale = pill.current ? pill.current.getBoundingClientRect().width / pill.current.offsetWidth || 1 : 1
+    const x = (tr.left - lr.left) / scale
+    const width = tr.width / scale
+    if (instant || prefersReducedMotion()) {
+      gsap.set(g, { x, width, opacity: 1, scaleX: 1 })
+      return
+    }
+    gsap.killTweensOf(g)
+    gsap
+      .timeline()
+      .to(g, { x, width, opacity: 1, duration: 0.55, ease: 'power3.out' }, 0)
+      .to(g, { scaleX: 1.25, scaleY: 0.9, duration: 0.25, ease: 'power2.out' }, 0)
+      .to(g, { scaleX: 1, scaleY: 1, duration: 0.9, ease: 'elastic.out(1, 0.45)' }, 0.25)
   }
   useEffect(() => {
     const el = list.current?.querySelector<HTMLElement>(`[data-nav-id="${active}"]`)
     moveGlow(el ?? null)
   }, [active])
+
+  /* Pointer over the glass: the specular highlight follows it and the items near it magnify, dock-style. */
+  useEffect(() => {
+    const el = pill.current
+    const l = list.current
+    if (!el || !l || prefersReducedMotion()) return
+    const items = [...l.querySelectorAll<HTMLElement>('[data-nav-item]')]
+    const onMove = (e: MouseEvent) => {
+      const r = el.getBoundingClientRect()
+      el.style.setProperty('--hx', `${((e.clientX - r.left) / r.width) * 100}%`)
+      el.style.setProperty('--hy', `${((e.clientY - r.top) / r.height) * 100}%`)
+      for (const item of items) {
+        const ir = item.getBoundingClientRect()
+        const d = Math.abs(e.clientX - (ir.left + ir.width / 2))
+        const s = 1 + 0.16 * Math.max(0, 1 - d / 150)
+        gsap.to(item, { scale: s, y: -(s - 1) * 10, duration: 0.35, ease: 'power3.out', overwrite: 'auto' })
+      }
+    }
+    const onLeave = () => items.forEach((item) => gsap.to(item, { scale: 1, y: 0, duration: 0.8, ease: 'elastic.out(1, 0.5)', overwrite: 'auto' }))
+    el.addEventListener('mousemove', onMove, { passive: true })
+    el.addEventListener('mouseleave', onLeave)
+    return () => {
+      el.removeEventListener('mousemove', onMove)
+      el.removeEventListener('mouseleave', onLeave)
+    }
+  }, [])
 
   /* The glass firms up once the hero is gone. */
   useEffect(() => {
@@ -112,34 +170,38 @@ export function Nav({ onMenuToggle }: Props) {
           />
         </a>
 
-        {/* The glass: a frosted pill of the page's rooms. Desktop only; phones use the round menu. */}
-        <nav aria-label="Sections" className="glass absolute left-1/2 top-4 hidden -translate-x-1/2 rounded-full p-1 lg:block">
+        {/* The liquid glass: a pill of the page's rooms. Desktop only; phones use the round menu. */}
+        <nav ref={pill} aria-label="Sections" className="liquid group/pill absolute left-1/2 top-4 hidden -translate-x-1/2 p-1.5 lg:block">
+          <span aria-hidden="true" className="liquid-base" />
+          <span aria-hidden="true" className="liquid-lens" />
+          <span aria-hidden="true" className="liquid-caustic" />
+          <span aria-hidden="true" className="liquid-spec" />
           <ul ref={list} className="relative flex items-center">
-            <span ref={glow} aria-hidden="true" className="glass-glow pointer-events-none absolute left-0 top-0 h-full rounded-full opacity-0" />
+            <span ref={glow} aria-hidden="true" className="liquid-glow pointer-events-none absolute left-0 top-0 h-full origin-center rounded-full opacity-0" />
             {ITEMS.map((item) =>
               item.live ? (
-                <li key={item.id}>
+                <li key={item.id} data-nav-item className="origin-bottom">
                   <a
                     href={`#${item.id}`}
                     data-nav-id={item.id}
                     aria-current={active === item.id ? 'location' : undefined}
                     onMouseEnter={(e) => moveGlow(e.currentTarget)}
                     onMouseLeave={() => moveGlow(list.current?.querySelector<HTMLElement>(`[data-nav-id="${active}"]`) ?? null)}
-                    className={`relative z-10 flex h-9 items-center rounded-full px-4 text-[13px] font-semibold tracking-wide transition-opacity duration-300 ${active === item.id ? 'opacity-100' : 'opacity-75 hover:opacity-100'}`}
+                    className={`relative z-10 flex h-9 items-center rounded-full px-4 text-[13px] font-semibold tracking-wide transition-[opacity,padding] duration-500 ease-[var(--ease-brand)] group-hover/pill:px-[1.15rem] ${active === item.id ? 'opacity-100' : 'opacity-75 hover:opacity-100'}`}
                   >
                     {item.label}
                   </a>
                 </li>
               ) : (
-                <li key={item.id}>
-                  <span title="Coming soon" aria-disabled="true" className="relative z-10 flex h-9 cursor-default items-center rounded-full px-4 text-[13px] font-semibold tracking-wide opacity-35">
+                <li key={item.id} data-nav-item className="origin-bottom">
+                  <span title="Coming soon" aria-disabled="true" className="relative z-10 flex h-9 cursor-default items-center rounded-full px-4 text-[13px] font-semibold tracking-wide opacity-35 transition-[padding] duration-500 ease-[var(--ease-brand)] group-hover/pill:px-[1.15rem]">
                     {item.label}
                   </span>
                 </li>
               ),
             )}
           </ul>
-          <span aria-hidden="true" className="glass-sheen pointer-events-none absolute inset-0 rounded-full" />
+          <span aria-hidden="true" className="liquid-rim" />
         </nav>
 
         <div className="flex items-center gap-3">

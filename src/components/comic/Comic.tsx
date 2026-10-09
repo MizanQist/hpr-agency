@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger, hasFinePointer, prefersReducedMotion } from '../../lib/motion'
-import { setNavTheme } from '../../lib/theme'
 import { Magnetic } from '../shell/Magnetic'
 
 const img = (f: string) => `${import.meta.env.BASE_URL}img/${f}`
@@ -134,9 +133,6 @@ export function Comic() {
           start: 'top top',
           end: 'bottom bottom',
           scrub: 0.4,
-          onEnter: () => setNavTheme('light'),
-          onEnterBack: () => setNavTheme('light'),
-          onLeaveBack: () => setNavTheme('dark'),
         },
       })
       tl.fromTo('[data-title] > span', { scale: 0.5, rotate: -6, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.07, ease: 'back.out(2)', stagger: 0.012 }, 0)
@@ -145,7 +141,6 @@ export function Comic() {
     })
 
     mm.add('(max-width: 1023px)', () => {
-      ScrollTrigger.create({ trigger: root, start: 'top 60%', end: 'bottom 40%', onEnter: () => setNavTheme('light'), onEnterBack: () => setNavTheme('light'), onLeaveBack: () => setNavTheme('dark') })
       gsap.fromTo('[data-title] > span', { scale: 0.5, rotate: -6, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.6, ease: 'back.out(2)', stagger: 0.05, scrollTrigger: { trigger: '[data-title]', start: 'top 80%', toggleActions: 'play none none reverse' } })
       PANELS.forEach((_, i) => {
         const tl = gsap.timeline({ scrollTrigger: { trigger: `[data-panel="${i}"]`, start: 'top 78%', toggleActions: 'play none none reverse' } })
@@ -212,7 +207,7 @@ export function Comic() {
   ))
 
   return (
-    <section ref={track} id="story" aria-labelledby="story-heading" className={`relative bg-paper text-navy ${still ? '' : 'lg:h-[340vh]'}`}>
+    <section ref={track} id="story" data-ground="light" aria-labelledby="story-heading" className={`relative bg-paper text-navy ${still ? '' : 'lg:h-[340vh]'}`}>
       {/* posterise: six levels per channel, then the CSS contrast/saturation on top */}
       <svg aria-hidden="true" className="absolute h-0 w-0">
         <filter id="comic-ink" colorInterpolationFilters="sRGB">

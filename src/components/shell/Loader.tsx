@@ -4,19 +4,19 @@ import { gsap, prefersReducedMotion } from '../../lib/motion'
 const MASK = `${import.meta.env.BASE_URL}img/hpr-wordmark-mask.png`
 
 /* The curtain: navy, the wordmark wipes on in gold, then the whole thing lifts to reveal the hero. */
-export function Loader({ onDone }: { onDone: () => void }) {
+export function Loader({ onDone }: { onDone?: () => void } = {}) {
   const [gone, setGone] = useState(false)
 
   useEffect(() => {
     if (prefersReducedMotion()) {
       setGone(true)
-      onDone()
+      onDone?.()
       return
     }
     const tl = gsap.timeline({
       onComplete: () => {
         setGone(true)
-        onDone()
+        onDone?.()
       },
     })
     tl.fromTo('[data-loader-mark]', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.9, ease: 'power3.inOut' }, 0.15)
