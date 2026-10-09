@@ -38,7 +38,7 @@ body {
   font-family: var(--font-sans);
   font-weight: 400;
   color: var(--color-paper);
-  background: var(--color-navy);
+  /* no body background: the fixed lattice layer behind <main> must show through transparent sections */
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
@@ -65,6 +65,10 @@ html.lenis, html.lenis body { height: auto; }
 .marquee-left  { animation: marquee-left 40s linear infinite; }
 .marquee-right { animation: marquee-right 40s linear infinite; }
 
+/* The lattice pattern moves one tile diagonally per minute, so the loop is seamless. */
+@keyframes pattern-drift { to { transform: translate(128px, 128px); } }
+.pattern-drift { animation: pattern-drift 60s linear infinite; }
+
 @media (prefers-reduced-motion: reduce) {
-  .marquee-left, .marquee-right { animation: none; }
+  .marquee-left, .marquee-right, .pattern-drift { animation: none; }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap, prefersReducedMotion } from '../../lib/motion'
-import { Contours } from './Contours'
+import { Pattern } from './Pattern'
 import { Magnetic } from './Magnetic'
 
 const LOGO = `${import.meta.env.BASE_URL}hpr-logo.png`
@@ -84,7 +84,7 @@ export function Nav({ onMenuToggle }: Props) {
         className="fixed inset-0 z-40 bg-navy text-paper"
         style={{ clipPath: 'inset(0 0 100% 0)', pointerEvents: 'none' }}
       >
-        <Contours color="#d1ad65" opacity={0.12} />
+        <Pattern line="#d1ad65" dot="#d1ad65" lineOpacity={0.16} dotOpacity={0.32} />
         <nav aria-label="Site" className="relative flex h-full flex-col justify-end px-spine pb-10 pt-28 sm:justify-center sm:pb-0">
           <ul className="flex flex-col gap-1">
             {ITEMS.map((item, i) => (

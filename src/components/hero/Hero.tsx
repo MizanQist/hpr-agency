@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { ScrubVideo } from '../../ScrubVideo'
-import { Contours } from '../shell/Contours'
+import { Pattern } from '../shell/Pattern'
 import { gsap, ScrollTrigger, prefersReducedMotion } from '../../lib/motion'
 
 const MASK = `${import.meta.env.BASE_URL}img/hpr-wordmark-mask.png`
@@ -78,7 +78,7 @@ export function Hero() {
         <DeskCard />
 
         <div data-hero-panel className="absolute inset-0 bg-navy text-paper" style={{ clipPath: 'inset(100% 0 0 0)' }}>
-          <Contours color="#d1ad65" opacity={0.13} speed={0.8} />
+          <Pattern line="#d1ad65" dot="#d1ad65" lineOpacity={0.2} dotOpacity={0.4} />
           <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 select-none">
             <div data-row-one>
               <Marquee text={ROW_ONE} direction="left" className="font-sans text-[clamp(3rem,10vw,9.5rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-paper" />

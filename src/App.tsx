@@ -5,7 +5,7 @@ import { Loader } from './components/shell/Loader'
 import { Cursor } from './components/shell/Cursor'
 import { Progress } from './components/shell/Progress'
 import { Nav } from './components/shell/Nav'
-import { Contours } from './components/shell/Contours'
+import { Pattern } from './components/shell/Pattern'
 import { Hero } from './components/hero/Hero'
 import { Statement } from './components/statement/Statement'
 
@@ -27,9 +27,9 @@ export default function App() {
       <Cursor />
       <Progress />
       <Nav onMenuToggle={onMenuToggle} />
-      {/* The page's own ground: navy with gold contour lines; sections that want it stay transparent. */}
+      {/* The page's own ground: navy with the gold lattice; sections that want it stay transparent. */}
       <div aria-hidden="true" className="fixed inset-0 -z-10 bg-navy">
-        <Contours color="#d1ad65" opacity={0.08} speed={0.6} />
+        <Pattern line="#d1ad65" dot="#d1ad65" lineOpacity={0.16} dotOpacity={0.32} />
       </div>
       <main className={ready ? '' : 'pointer-events-none'}>
         <Hero />
