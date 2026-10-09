@@ -47,7 +47,8 @@ export function ScrubVideo() {
     }
     // Cursor x maps straight onto the timeline: left edge = first frame, right edge = last.
     const onMove = (e: MouseEvent) => {
-      if (!video.duration) return
+      // The hero is scrolled away: nothing to see, so don't decode frames under the page.
+      if (!video.duration || window.scrollY > window.innerHeight) return
       const fraction = Math.min(1, Math.max(0, e.clientX / window.innerWidth))
       targetTime = fraction * video.duration
       hasTarget = true
@@ -93,7 +94,8 @@ export function ScrubVideo() {
       muted
       playsInline
       preload="auto"
-      className="fixed inset-0 z-0 h-full w-full object-cover object-[40%_center] md:object-center"
+      aria-hidden="true"
+      className="absolute inset-0 h-full w-full object-cover object-[40%_center] md:object-center"
     />
   )
 }

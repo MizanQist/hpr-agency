@@ -1,12 +1,70 @@
 @import "tailwindcss";
 
-:root {
-  --font-heading: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+@font-face {
+  font-family: 'Mona Sans';
+  src: url('/fonts/Mona-Sans.woff2') format('woff2');
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+  font-display: swap;
+}
+
+/*
+  HPR tokens. Navy and gold are the logo's colours; paper is the page's light ground; ink the deepest room;
+  studio is the hero video's grey. Mona Sans carries the page, Instrument Serif carries the big italic lines.
+*/
+@theme {
+  --font-sans: 'Mona Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+
+  --color-navy: #0e2b4b;
+  --color-navy-2: #16375d;
+  --color-paper: #f4f3ee;
+  --color-gold: #d1ad65;
+  --color-ink: #111112;
+  --color-studio: #bdbabb;
+
+  --spacing-spine: clamp(1.25rem, 0.229rem + 4.19vw, 3rem);
+
+  --ease-brand: cubic-bezier(0.65, 0.05, 0, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html {
+  color-scheme: light only;
+  background: var(--color-navy);
 }
 
 body {
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   font-weight: 400;
-  background: #000;
+  color: var(--color-paper);
+  background: var(--color-navy);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+/* Lenis smooth scroll */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+/* The custom cursor replaces the system one only where it can actually follow a pointer. */
+@media (pointer: fine) {
+  html.has-cursor, html.has-cursor a, html.has-cursor button { cursor: none; }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+}
+
+/* Marquee rows: content is duplicated once, so -50% is one full loop. */
+@keyframes marquee-left { to { transform: translateX(-50%); } }
+@keyframes marquee-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+.marquee-left  { animation: marquee-left 40s linear infinite; }
+.marquee-right { animation: marquee-right 40s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-left, .marquee-right { animation: none; }
 }
