@@ -10,11 +10,11 @@
 
 /*
   HPR tokens. Navy and gold are the logo's colours; paper is the page's light ground; ink the deepest room;
-  studio is the hero video's grey. Mona Sans carries the page, Instrument Serif carries the big italic lines.
+  studio is the hero video's grey. Mona Sans (variable width and weight) carries the page; Syne is the display face.
 */
 @theme {
   --font-sans: 'Mona Sans', 'Helvetica Neue', Arial, sans-serif;
-  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-display: 'Syne', 'Mona Sans', 'Helvetica Neue', Arial, sans-serif;
   --font-comic: 'Bangers', 'Impact', 'Arial Narrow', sans-serif;
 
   --color-navy: #0e2b4b;
@@ -170,16 +170,10 @@ html.lenis, html.lenis body { height: auto; }
   background-size: 100% 100%, 9px 9px;
 }
 
-/* Marquee rows: content is duplicated once, so -50% is one full loop. */
-@keyframes marquee-left { to { transform: translateX(-50%); } }
-@keyframes marquee-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
-.marquee-left  { animation: marquee-left 40s linear infinite; }
-.marquee-right { animation: marquee-right 40s linear infinite; }
-
 /* The lattice pattern moves one tile diagonally per minute, so the loop is seamless. */
 @keyframes pattern-drift { to { transform: translate(128px, 128px); } }
 .pattern-drift { animation: pattern-drift 60s linear infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  .marquee-left, .marquee-right, .pattern-drift { animation: none; }
+  .pattern-drift { animation: none; }
 }

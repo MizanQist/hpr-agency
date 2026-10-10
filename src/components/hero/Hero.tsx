@@ -1,12 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { ScrubVideo } from '../../ScrubVideo'
 import { Pattern } from '../shell/Pattern'
+import { Kinetic } from './Kinetic'
 import { gsap, ScrollTrigger, prefersReducedMotion } from '../../lib/motion'
 
 const MASK = `${import.meta.env.BASE_URL}img/hpr-wordmark-mask.png`
-
-const ROW_ONE = 'If it is rare, hard to reach, or not for sale —'
-const ROW_TWO = 'ask HPR. Watches. Private jets. Animals. Properties.'
 
 /*
   The geometry of the shrink, measured from the stage itself (not window.inner*, which drifts with phone browser
@@ -23,19 +21,6 @@ function geometry(stage: HTMLElement) {
   const card = Math.min(w * 0.44, 288)
   const originY = insetTop + side / 2
   return { side, insetX, insetTop, insetBottom, card, originY, landY: h / 2 - originY }
-}
-
-function Marquee({ text, direction, className }: { text: string; direction: 'left' | 'right'; className: string }) {
-  const copy = Array.from({ length: 2 }, (_, i) => (
-    <span key={i} className="shrink-0 pr-[0.6em]" aria-hidden={i > 0}>
-      {text}
-    </span>
-  ))
-  return (
-    <div className="overflow-hidden whitespace-nowrap">
-      <div className={`flex w-max ${direction === 'left' ? 'marquee-left' : 'marquee-right'} ${className}`}>{copy}</div>
-    </div>
-  )
 }
 
 /* The small card bottom-left of the hero, where Lando's "next race" sits: the desk is open. */
@@ -63,7 +48,7 @@ function DeskCard() {
 /*
   Section 1 → 2. The hero is pinned for a second viewport. As the visitor scrolls, the full-screen video crops to a
   square and shrinks — continuously, scrubbed — until it sits as a small card in the centre of the navy room behind
-  it, where two rows of marquee have risen. The card is still the video: he keeps following the cursor.
+  it, where the kinetic type has arrived around it. The card is still the video: he keeps following the cursor.
 */
 export function Hero() {
   const track = useRef<HTMLElement>(null)
@@ -102,8 +87,15 @@ export function Hero() {
         0,
       )
         .to('[data-hero-card]', { y: 40, opacity: 0, ease: 'none', duration: 0.2 }, 0)
-        .fromTo('[data-row-one]', { opacity: 0, xPercent: 4 }, { opacity: 1, xPercent: -8, ease: 'none', duration: 1 }, 0.1)
-        .fromTo('[data-row-two]', { opacity: 0, xPercent: -4 }, { opacity: 1, xPercent: 8, ease: 'none', duration: 1 }, 0.1)
+        /* kinetic type: lines slide in from alternating sides while their letters widen and gain weight */
+        .fromTo('[data-k-line="0"]', { xPercent: -60, opacity: 0 }, { xPercent: 0, opacity: 1, ease: 'none', duration: 0.25 }, 0.12)
+        .fromTo('[data-k-line="0"] [data-k-word]', { fontVariationSettings: "'wdth' 75, 'wght' 300" }, { fontVariationSettings: "'wdth' 100, 'wght' 760", ease: 'none', duration: 0.25, stagger: 0.02 }, 0.14)
+        .fromTo('[data-k-line="1"]', { xPercent: 60, opacity: 0 }, { xPercent: 0, opacity: 1, ease: 'none', duration: 0.25 }, 0.22)
+        .fromTo('[data-k-line="1"] [data-k-word]', { fontVariationSettings: "'wdth' 75, 'wght' 300" }, { fontVariationSettings: "'wdth' 100, 'wght' 760", ease: 'none', duration: 0.25, stagger: 0.02 }, 0.24)
+        .fromTo('[data-k-line="2"]', { xPercent: -60, opacity: 0 }, { xPercent: 0, opacity: 1, ease: 'none', duration: 0.25 }, 0.32)
+        .fromTo('[data-k-line="2"] [data-k-word]', { fontVariationSettings: "'wdth' 75, 'wght' 300" }, { fontVariationSettings: "'wdth' 100, 'wght' 760", ease: 'none', duration: 0.25, stagger: 0.02 }, 0.34)
+        .fromTo('[data-k-line="3"]', { scale: 0.4, opacity: 0, y: 60 }, { scale: 1, opacity: 1, y: 0, ease: 'none', duration: 0.22 }, 0.58)
+        .fromTo('[data-k-line="4"]', { letterSpacing: '0.9em', opacity: 0 }, { letterSpacing: '0.3em', opacity: 1, ease: 'none', duration: 0.18 }, 0.74)
         .fromTo('[data-hero-frame]', { opacity: 0 }, { opacity: 1, ease: 'none', duration: 0.2 }, 0.45)
         .fromTo('[data-hero-caption]', { opacity: 0, y: 16 }, { opacity: 1, y: 0, ease: 'none', duration: 0.2 }, 0.7)
     }, root)
@@ -114,17 +106,10 @@ export function Hero() {
   return (
     <section ref={track} id="top" aria-label="HPR" className="relative h-[200vh]">
       <div data-ground="hero" className="sticky top-0 h-screen overflow-hidden bg-navy">
-        {/* the room behind: navy, the lattice, two rows of marquee */}
+        {/* the room behind: navy, the lattice, kinetic type around the landing spot */}
         <div className="absolute inset-0 text-paper">
           <Pattern line="#d1ad65" dot="#d1ad65" lineOpacity={0.2} dotOpacity={0.4} />
-          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 select-none">
-            <div data-row-one>
-              <Marquee text={ROW_ONE} direction="left" className="font-sans text-[clamp(3rem,10vw,9.5rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-paper" />
-            </div>
-            <div data-row-two className="mt-2 sm:mt-4">
-              <Marquee text={ROW_TWO} direction="right" className="font-display text-[clamp(3rem,10vw,9.5rem)] italic leading-[0.95] text-gold" />
-            </div>
-          </div>
+          <Kinetic />
         </div>
 
         {/* the card's shadow and caption sit under the video and fade in as it lands */}

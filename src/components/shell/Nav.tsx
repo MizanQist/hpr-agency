@@ -247,15 +247,15 @@ export function Nav({ onMenuToggle }: Props) {
                     href={`#${item.id}`}
                     onClick={() => setOpen(false)}
                     tabIndex={open ? 0 : -1}
-                    className="flex items-baseline gap-5 font-display text-[clamp(2.5rem,9vw,6rem)] leading-[0.95] text-paper transition-colors duration-500 ease-[var(--ease-brand)] hover:text-gold"
+                    className="flex items-baseline gap-5 font-display text-[clamp(2.25rem,8vw,5.25rem)] font-bold leading-[0.95] tracking-[-0.02em] text-paper transition-colors duration-500 ease-[var(--ease-brand)] hover:text-gold"
                   >
                     <span className="font-sans text-xs font-medium tracking-widest text-gold">0{i + 1}</span>
-                    <span className="italic">{item.label}</span>
+                    <span>{item.label}</span>
                   </a>
                 ) : (
-                  <span data-menu-item className="flex items-baseline gap-5 font-display text-[clamp(2.5rem,9vw,6rem)] leading-[0.95] text-paper/35">
+                  <span data-menu-item className="flex items-baseline gap-5 font-display text-[clamp(2.25rem,8vw,5.25rem)] font-bold leading-[0.95] tracking-[-0.02em] text-paper/35">
                     <span className="font-sans text-xs font-medium tracking-widest text-gold/50">0{i + 1}</span>
-                    <span className="italic">{item.label}</span>
+                    <span>{item.label}</span>
                   </span>
                 )}
               </li>
