@@ -19,12 +19,33 @@ const PANELS: Panel[] = [
       { name: 'ap-royal-oak', alt: 'An Audemars Piguet Royal Oak in a brown presentation box.' },
     ],
   },
-  { id: 'jet', word: 'Private jets', line: 'Charter, a share, or the aircraft itself. Crewed, positioned, ready.', placeholder: 'private jet' },
+  {
+    id: 'jet',
+    word: 'Private jets',
+    line: 'Charter, a share, or the aircraft itself. Crewed, positioned, ready.',
+    photos: [
+      { name: 'jet-steps', alt: 'The founder on the air stairs of a Gulfstream, on the phone, blue sky behind.' },
+      { name: 'jet-door', alt: 'The founder sitting in the open door of a Citation on the apron, another jet taxiing behind.' },
+    ],
+  },
+  {
+    id: 'car',
+    word: 'Cars',
+    line: 'Limited runs, bespoke commissions, the allocation you were told had gone.',
+    photos: [
+      { name: 'car-cullinan', alt: 'The founder sitting on the bonnet of a black Rolls-Royce Cullinan.' },
+      { name: 'car-brabus', alt: 'A black Brabus G-Class parked outside a café in Lagos, the Lekki-Ikoyi bridge behind.' },
+    ],
+  },
   { id: 'animal', word: 'Animals', line: 'From thoroughbreds to the rarest breeds, sourced and moved with the right papers.', placeholder: 'animal' },
   { id: 'property', word: 'Properties', line: 'Homes that were never listed, in the cities that matter.', placeholder: 'property' },
 ]
 const N = PANELS.length
 const STEP = 1 / (N - 1)
+/* The ground turns navy → paper while the second room slides out, so no room rests on the muddy mid-tone. */
+const FADE = STEP * 1.1
+const FADE_LEN = STEP * 0.8
+const INK = STEP * 1.5
 
 const WORD = 'block whitespace-nowrap font-sans text-[clamp(3rem,8.6vw,8.5rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.035em] [font-stretch:88%]'
 
@@ -127,16 +148,16 @@ export function Gallery() {
           onUpdate: (self) => {
             const i = Math.min(N - 1, Math.max(0, Math.round(self.progress * (N - 1))))
             if (counter.current) counter.current.textContent = String(i + 1).padStart(2, '0')
-            root.querySelector('[data-stage]')?.setAttribute('data-ground', self.progress > 0.45 ? 'light' : 'dark')
+            root.querySelector('[data-stage]')?.setAttribute('data-ground', self.progress > INK ? 'light' : 'dark')
           },
         },
       })
       tl.to('[data-rail]', { x: `-${(N - 1) * 100}vw`, ease: 'none', duration: 1 }, 0)
         /* the ground fades between rooms two and three; the ink flips quickly in the middle of that fade so it never lingers in a mid-tone */
-        .fromTo('[data-stage]', { backgroundColor: '#0e2b4b' }, { backgroundColor: '#f4f3ee', ease: 'none', duration: 0.3 }, 0.3)
-        .fromTo('[data-stage]', { color: '#f4f3ee' }, { color: '#0e2b4b', ease: 'none', duration: 0.06 }, 0.42)
-        .fromTo('[data-pattern-gold]', { opacity: 1 }, { opacity: 0, ease: 'none', duration: 0.3 }, 0.3)
-        .fromTo('[data-pattern-navy]', { opacity: 0 }, { opacity: 1, ease: 'none', duration: 0.3 }, 0.3)
+        .fromTo('[data-stage]', { backgroundColor: '#0e2b4b' }, { backgroundColor: '#f4f3ee', ease: 'none', duration: FADE_LEN }, FADE)
+        .fromTo('[data-stage]', { color: '#f4f3ee' }, { color: '#0e2b4b', ease: 'none', duration: 0.05 }, INK)
+        .fromTo('[data-pattern-gold]', { opacity: 1 }, { opacity: 0, ease: 'none', duration: FADE_LEN }, FADE)
+        .fromTo('[data-pattern-navy]', { opacity: 0 }, { opacity: 1, ease: 'none', duration: FADE_LEN }, FADE)
         .fromTo('[data-progress]', { scaleX: 0 }, { scaleX: 1, ease: 'none', duration: 1 }, 0)
       /* Every tween stays inside [0, 1]: anything longer would stretch the timeline and desync the rail from the scroll. */
       const span = (from: number, to: number) => {

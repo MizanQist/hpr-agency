@@ -8,7 +8,7 @@ import { gsap, hasFinePointer, prefersReducedMotion } from '../../lib/motion'
 */
 const LINES_TOP = ['If it is rare,', 'hard to reach,', 'or not for sale —']
 const PUNCH = 'Ask HPR.'
-const CATEGORIES = ['Watches', 'Private jets', 'Animals', 'Properties']
+const CATEGORIES = ['Watches', 'Private jets', 'Cars', 'Animals', 'Properties']
 
 const REST = "'wdth' 100, 'wght' 760"
 

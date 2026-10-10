@@ -16,6 +16,7 @@ const EMAIL = 'hello@hpr.com' // [Client: confirm the enquiries email]
 const CATEGORIES = [
   { id: 'watch', label: 'Watches', option: 'a watch', word: 'Watches' },
   { id: 'jet', label: 'Private jets', option: 'a private jet', word: 'Jets' },
+  { id: 'car', label: 'Cars', option: 'a car', word: 'Cars' },
   { id: 'animal', label: 'Animals', option: 'an animal', word: 'Animals' },
   { id: 'property', label: 'Properties', option: 'a property', word: 'Property' },
   { id: 'other', label: 'Something else', option: 'something else', word: 'Anything' },

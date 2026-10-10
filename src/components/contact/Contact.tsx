@@ -4,7 +4,7 @@ import { Magnetic } from '../shell/Magnetic'
 import { PixelPortrait } from './PixelPortrait'
 
 const LOGO = `${import.meta.env.BASE_URL}hpr-logo.png`
-const PORTRAIT = `${import.meta.env.BASE_URL}img/founder-sofa-4x5-780.jpg`
+const PORTRAIT = `${import.meta.env.BASE_URL}img/founder-qatar-780.jpg`
 
 const HEADLINE = 'Say the word.'
 const COLUMNS = [
@@ -13,7 +13,7 @@ const COLUMNS = [
   { heading: 'Follow', lines: ['[Client: Instagram handle]', '[Client: TikTok handle]'] },
   { heading: 'Registered', lines: ['[Client: registered company name]', '[Client: RC number]'] },
 ]
-const TICKER = ['Watches', 'Private jets', 'Animals', 'Properties', 'If it exists, ask']
+const TICKER = ['Watches', 'Private jets', 'Cars', 'Animals', 'Properties', 'If it exists, ask']
 
 /* A hard-edged button with a stepped pixel shadow; the shadow deepens by one pixel step on hover. */
 const PIXEL_BTN = 'inline-flex h-12 items-center px-6 font-pixel text-[13px] uppercase tracking-[0.08em] transition-[transform,box-shadow] duration-150 ease-steps hover:-translate-x-[2px] hover:-translate-y-[2px]'
