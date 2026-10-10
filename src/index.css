@@ -16,6 +16,9 @@
   --font-sans: 'Mona Sans', 'Helvetica Neue', Arial, sans-serif;
   --font-display: 'Syne', 'Mona Sans', 'Helvetica Neue', Arial, sans-serif;
   --font-comic: 'Bangers', 'Impact', 'Arial Narrow', sans-serif;
+  --font-pixel: 'Silkscreen', 'Courier New', monospace;
+
+  --ease-steps: steps(4, end);
 
   --color-navy: #0e2b4b;
   --color-navy-2: #16375d;
@@ -176,4 +179,22 @@ html.lenis, html.lenis body { height: auto; }
 
 @media (prefers-reduced-motion: reduce) {
   .pattern-drift { animation: none; }
+}
+
+/* Pixel art room: a stepped edge, a blinking block cursor, a crisp ticker. */
+.pixel-edge {
+  mask-image: repeating-linear-gradient(90deg, #000 0 16px, transparent 16px 32px), linear-gradient(#000, #000);
+  mask-composite: intersect;
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 16px, transparent 16px 32px);
+  mask-size: 100% 50%, 100% 100%;
+  -webkit-mask-size: 100% 50%;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+.pixel-cursor { animation: pixel-blink 1s steps(1, end) infinite; }
+@keyframes pixel-blink { 50% { opacity: 0; } }
+.ticker { animation: ticker 40s steps(400, end) infinite; }
+@keyframes ticker { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .pixel-cursor, .ticker { animation: none; }
 }

@@ -15,7 +15,7 @@ const ITEMS: Array<{ label: string; id: string; live: boolean }> = [
   { label: 'What we find', id: 'find', live: true },
   { label: 'The founder', id: 'founder', live: true },
   { label: 'The desk', id: 'desk', live: true },
-  { label: 'Contact', id: 'contact', live: false },
+  { label: 'Contact', id: 'contact', live: true },
 ]
 
 type Props = { onMenuToggle?: (open: boolean) => void }
