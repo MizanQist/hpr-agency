@@ -10,6 +10,7 @@ import { Hero } from './components/hero/Hero'
 import { Comic } from './components/comic/Comic'
 import { Gallery } from './components/gallery/Gallery'
 import { Split } from './components/split/Split'
+import { Desk } from './components/desk/Desk'
 
 export default function App() {
   const lenis = useRef<Lenis | null>(null)
@@ -36,6 +37,7 @@ export default function App() {
         <Comic />
         <Gallery />
         <Split />
+        <Desk />
       </main>
     </>
   )
