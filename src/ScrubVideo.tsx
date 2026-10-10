@@ -47,8 +47,8 @@ export function ScrubVideo() {
     }
     // Cursor x maps straight onto the timeline: left edge = first frame, right edge = last.
     const onMove = (e: MouseEvent) => {
-      // The hero is scrolled away: nothing to see, so don't decode frames under the page.
-      if (!video.duration || window.scrollY > window.innerHeight) return
+      // The hero's track is two viewports (full screen, then the small card); past it there is nothing to see.
+      if (!video.duration || window.scrollY > window.innerHeight * 2) return
       const fraction = Math.min(1, Math.max(0, e.clientX / window.innerWidth))
       targetTime = fraction * video.duration
       hasTarget = true
